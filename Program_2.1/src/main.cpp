@@ -2,12 +2,11 @@
 #include <limits>
 #include "lista.hh"
 
-#define Typ int  /* Definicja typu dla jakiego wykonywany bedzie program.
-		    Po zmianie typu nalezy skompilowac program poleceniem make.
-		    Program testowany byl na typach: int, float, double */
+#define Typ string /*Definicja typu dla jakiego wykonywany bedzie program.
+		     Po zmianie typu nalezy skompilowac program poleceniem make
+		     Program testowany byl dla typow: int, float, double, string*/
 
 using namespace std;
-
 
 int main()
 {
@@ -50,7 +49,7 @@ int main()
 	    }
 	  else /* dodanie elementu na poczatek stosu */
 	    {
-	      lista.add_front(element);
+	      lista.dodaj_na_poczatek(element);
 	    }	  
 	  break;
 
@@ -59,11 +58,11 @@ int main()
 	  break;
 
 	case 3: /* wyswietlenie aktualnego rozmiaru listy */
-	  cout<<"Rozmiar listy :"<<lista.size()<<endl;
+	  cout<<"Rozmiar listy :"<<lista.wielkosc_stosu()<<endl;
 	  break;
 
 	case 4: /* usuniecie elementu z przodu listy */
-	  lista.delete_front(); 
+	  lista.usun_z_poczatku(); 
 	  break;
 
 	default: /* nierozpoznana opcja */
