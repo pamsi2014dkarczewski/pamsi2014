@@ -2,9 +2,10 @@
 #include <limits>
 #include "lista.hh"
 
-#define Typ int  /* Definicja typu dla jakiego wykonywany bedzie program.
-		    Po zmianie typu nalezy skompilowac program poleceniem make.
-		    Program testowany byl na typach: int, float, double */
+/* Definicja typu dla jakiego wykonywany bedzie program.
+   Po zmianie typu nalezy skompilowac program poleceniem make.
+   Program testowany byl dla typow: int, float, double, char, string  */
+#define Typ int
 
 using namespace std;
 
@@ -14,7 +15,7 @@ int main()
   int opcja; /* zmienna wyboru opcji menu */
 
   Typ element; /* definicja pojedynczego elementu listy */
-  stos<Typ> lista; /* definicja stosu */
+  lista<Typ> lista; /* definicja listy dwukierunkowej */
 
   cout<<"Lista 2, Program 2.2 |zajecia PAMSI| lista dwukierunkowa."<<endl;
  
@@ -51,7 +52,8 @@ int main()
 	    }
 	  else
 	    {
-	      lista.add_front(element); /* dodanie elementu na poczatek listy */
+	      /* dodanie elementu na poczatek listy */
+	      lista.dodaj_na_poczatek(element); 
 	    }	  
 	  break;
 
@@ -66,19 +68,19 @@ int main()
 	    }
 	  else /* dodanie elementu na koniec listy */
 	    {
-	      lista.add_back(element); 
+	      lista.dodaj_na_koniec(element); 
 	    }	  
 	  break;
 
 	case 3: /* wyswietlenie listy */
-	  cout<<"Rozmiar listy: "<<lista.size()<<endl<<endl;
+	  cout<<"Rozmiar listy: "<<lista.wielkosc_listy()<<endl<<endl;
 	  lista.wyswietl_liste(); 
 	  break;
 
 	case 4: /* usuniecie elementu z przodu listy */
-	  if(lista.size() > 0) /* jezeli lista zawiera elementy */
+	  if(lista.wielkosc_listy() > 0) /* jezeli lista zawiera elementy */
 	    {
-	      lista.delete_front();
+	      lista.usun_z_poczatku();
 	    }
 	  else /* lista pusta */
 	    {
@@ -87,9 +89,9 @@ int main()
 	  break;
 
 	case 5: /* usuniecie elementu z konca listy */
-	  if(lista.size() > 0) /* jezeli lista zawiera elementy */
+	  if(lista.wielkosc_listy() > 0) /* jezeli lista zawiera elementy */
 	    {
-	      lista.delete_back(); 
+	      lista.usun_z_konca(); 
 	    }
 	  else /* lista pusta */
 	    {

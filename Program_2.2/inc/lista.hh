@@ -2,23 +2,28 @@
 #define LISTA_HH
 
 /************************** KLASA ELEMENT_LISTY **************************/
-/* Klasa zawiera wartosc elementu w liscie oraz wskaznik na element nastepny i poprzedni */
+/* Klasa zawiera wartosc elementu w liscie oraz wskaznik na element 
+   nastepny i poprzedni */
 
 template <typename Typ>
 class element_listy
 {
 public:
   Typ wartosc; /* wartosc elementu listy */
-  element_listy *nastepny, *poprzedni; /* wskaznik na nastepny i poprzedni element listy */
+
+  /* wskaznik na nastepny i poprzedni element listy */
+  element_listy *nastepny, *poprzedni; 
 
   element_listy() 
   {
     nastepny = poprzedni = NULL;
   } 
 
-  element_listy(const Typ& wart, element_listy *wsk = NULL, element_listy *wsk2 = NULL)  /* konstruktor */ 
+  /* konstruktor */
+  element_listy(const Typ& wart, element_listy *wsk = NULL, element_listy *wsk2 = NULL) 
   {
-    wartosc = wart; /* do 'wartosc' przypisywana jest wartosc ktora zostanie dodana do listy */
+    /* do 'wartosc' przypisywana jest wartosc ktora zostanie dodana do listy */
+    wartosc = wart; 
     nastepny = wsk; /* ustawienie wskaznika na element nastepny */
     poprzedni = wsk2; /* ustawienie wskaznika na element poprzedni */
   } 
@@ -30,71 +35,80 @@ public:
 
 /**************************** KLASA STOS ********************************/
 /* Klasa definiuje liste oraz operacje jakie mozna na niej wykonac */
-/* Zawiera takze wskaznik na pierwszy element, ostatni element i przechowuje aktualny rozmiar stosu */
+/* Zawiera takze wskaznik na pierwszy element, ostatni element i przechowuje
+   aktualny rozmiar listy */
 
 template <typename Typ>
-class stos
+class lista
 {
 private:
   element_listy<Typ> *poczatek; /* wskaznik na pierwszy element listy */
   element_listy<Typ> *koniec; /* wskaznik na ostatni element listy */
-  int rozmiar_stosu; /* przechowuje rozmiar stosu */
+  int rozmiar_listy; /* przechowuje rozmiar listy */
 
 public:
-  stos() /* konstruktor */
+  lista() /* konstruktor */
   {
     poczatek = koniec = NULL; /* poczatek i koniec wskazuja na NULL */
-    rozmiar_stosu = 0; /* stworzony stos nie ma rozmiaru */
+    rozmiar_listy = 0; /* stworzona lista na poczatku nie ma rozmiaru */
   }
 
-  /* Funkcja sprawdzajaca czy stos jest pusty.
-     Zwraca 'true' jeżeli stos jest pusty przeciwnym wypadku zwroci 'false' */
-  bool stos_pusty()
+  /* Funkcja sprawdzajaca czy lista jest pusta.
+     Zwraca 'true' jeżeli lista jest pusty przeciwnym wypadku zwroci 'false' */
+  bool lista_pusta()
   {
     if (poczatek != NULL) return false;
     return true;  
   }
 
-  /* funkcja zwracajaca aktualna ilosc elementow na stosie */
-  Typ size()
+  /* funkcja zwracajaca aktualna ilosc elementow w liscie */
+  int wielkosc_listy()
   {
-    return rozmiar_stosu; 
+    return rozmiar_listy; 
   }
 
-  void add_front(const Typ &dana); /* dodanie elementu na poczatek listy */
-  void add_back(const Typ &dana); /* dodanie elementu na koniec listy */
-  Typ delete_front(); /* usuniecie elementu z poczatku listy */
-  Typ delete_back(); /* usuniecie elementu z konca listy */
+  void dodaj_na_poczatek(const Typ &dana);/*dodanie elementu na poczatek listy*/
+  void dodaj_na_koniec(const Typ &dana); /* dodanie elementu na koniec listy */
+  Typ usun_z_poczatku(); /* usuniecie elementu z poczatku listy */
+  Typ usun_z_konca(); /* usuniecie elementu z konca listy */
   void wyswietl_liste(); /* wyswietlanie zawartosci listy */
 
-  ~stos(); /* destruktor */ 
+  ~lista(); /* destruktor */ 
 
-}; /* end class 'stos' */
-/*************************************************************************/
+}; /* end class 'lista' */
+/*****************************************************************************/
 
 
 
 /****************************** DODANIE NA POCZATEK **************************/
 template <typename Typ>
-void stos<Typ>::add_front(const Typ &dana)
+void lista<Typ>::dodaj_na_poczatek(const Typ &dana)
 {
   if(poczatek != NULL) /* jezeli lista nie jest pusta */
     {
       /* stworzenie nowego elementu i inicjalizacja jego pol 
 	 pole 'wartosc' otrzymuje wartosc przekazana przez 'dana'
-	 pole 'nastepny' otrzymuje wartosc zmiennej 'poczatek', tak ze pole to wskazuje na pierwszy element listy
+
+	 pole 'nastepny' otrzymuje wartosc zmiennej 'poczatek', tak ze pole to 
+	 wskazuje na pierwszy element listy
+
 	 pole 'poprzedni' otrzymuje wartosc NULL */
       poczatek = new element_listy<Typ>(dana,poczatek,NULL);
 
       /* pole 'poczatek' jest ustawiane tak aby wskazywalo na nowy element
-	 pole 'poprzedni' elementu nastepnego jest ustawiane tak aby wskazywalo na nowy element (czyli wskazuje 'do tylu', nie jest to NULL) */
+
+	 pole 'poprzedni' elementu nastepnego jest ustawiane tak aby wskazywalo 
+	 na nowy element (czyli wskazuje 'do tylu', ale nie jest to NULL) */
       poczatek->nastepny->poprzedni=poczatek;
     }
   else /* jezeli lista jest pusta */
     {
-      koniec = poczatek = new element_listy<Typ>(dana); /* dodanie nowego elementu na poczatek */
+      /* dodanie nowego elementu na poczatek */
+      koniec = poczatek = new element_listy<Typ>(dana); 
     }
-  rozmiar_stosu++; /* zwiekszenie zmiennej okreslajacej aktualny rozmiar stosu */
+
+  /* zwiekszenie zmiennej okreslajacej aktualny rozmiar listy */
+  rozmiar_listy++; 
 }
 /*****************************************************************************/
 
@@ -102,25 +116,32 @@ void stos<Typ>::add_front(const Typ &dana)
 
 /************************* DODANIE NA KONIEC LISTY ***************************/
 template <typename Typ>
-void stos<Typ>::add_back(const Typ &dana)
+void lista<Typ>::dodaj_na_koniec(const Typ &dana)
 {
   if(koniec != NULL) /* gdy lista nie jest pusta */
     {
       /* stworzenie nowego elementu i inicjalizacja jego pol 
 	 pole 'wartosc' otrzymuje wartosc przekazana przez 'dana'
+
 	 pole 'nastepny' otrzymuje wartosc NULL
-	 pole 'poprzedni' otrzymuje wartosc zmiennej 'koniec', tak ze pole to wskazuje na ostatni element listy */
+
+	 pole 'poprzedni' otrzymuje wartosc zmiennej 'koniec', tak ze pole to 
+	 wskazuje na ostatni element listy */
       koniec = new element_listy<Typ>(dana,NULL,koniec); 
 
       /* pole 'koniec' jest ustawiane tak aby wskazywalo na nowy element
-	 pole 'nastepny' poprzednika jest ustawiane tak aby wskazywalo na nowy element */     
+
+	 pole 'nastepny' poprzednika jest ustawiane tak aby wskazywalo na 
+	 nowy element */     
       koniec->poprzedni->nastepny=koniec;
     }
   else /* gdy lista jest pusta */
     {
       poczatek = koniec = new element_listy<Typ>(dana);
     }
-  rozmiar_stosu++;
+
+  /* zwiekszenie zmiennej okreslajacej aktualny rozmiar stosu */
+  rozmiar_listy++; 
 }
 /*****************************************************************************/
 
@@ -128,10 +149,11 @@ void stos<Typ>::add_back(const Typ &dana)
 
 /*************************** USUNIECIE Z PRZODU LISTY ************************/
 template <typename Typ>
-Typ stos<Typ>::delete_front()
+Typ lista<Typ>::usun_z_poczatku()
 {
   /* utworzenie zmiennej 'element'
-     'element' otrzymuje 'wartosc' elementu, nastepnie 'poczatek' jest ustawiany na element nastepny */
+     'element' otrzymuje 'wartosc' elementu, nastepnie 'poczatek' jest 
+     ustawiany na element nastepny */
   Typ element = poczatek -> wartosc;
   if(koniec == poczatek) /* gdy na liscie jest tylko jeden element */
     {
@@ -141,12 +163,20 @@ Typ stos<Typ>::delete_front()
   else /* gdy na liscie jest wiecej niz jeden element */
     {
       /* 'poczatek' wskazuje na element nastepny,
-	 dostaje sie do pola 'nastepny' w 'poczatek' i adres ten przypisuje do 'poczatek' */
+	 dostaje sie do pola 'nastepny' w 'poczatek' i adres ten 
+	 przypisuje do 'poczatek' */
       poczatek = poczatek -> nastepny;
-      delete poczatek -> poprzedni; /* usuniecie z poczatku wskaznika do poprzedniego elementu */
-      poczatek -> poprzedni = NULL; /* nie ma nic przed poczatkiem listy, dlatego pokazuje na NULL */
+
+      /* usuniecie z poczatku wskaznika do poprzedniego elementu */
+      delete poczatek -> poprzedni; 
+
+      /* nie ma nic przed poczatkiem listy, dlatego pokazuje na NULL */      
+      poczatek -> poprzedni = NULL; 
     }
-  rozmiar_stosu--; /* zmniejszenie zmiennej, ktora okresla aktualny rozmiar stosu */
+
+  /* zmniejszenie zmiennej, ktora okresla aktualny rozmiar listy */
+  rozmiar_listy--; 
+
   return element; /* zwrocenie elementu */
 }
 /*****************************************************************************/
@@ -155,11 +185,13 @@ Typ stos<Typ>::delete_front()
 
 /*************************** USUNIECIE Z KONCA LISTY *************************/
 template <typename Typ>
-Typ stos<Typ>::delete_back()
+Typ lista<Typ>::usun_z_konca()
 {
   /* utworzenie zmiennej 'element'
-     'element' otrzymuje 'wartosc' elementu, nastepnie 'koniec' jest ustawiane na element poprzedzajacy */
+     'element' otrzymuje 'wartosc' elementu, nastepnie 'koniec' ustawiane jest 
+     na element poprzedzajacy */
   Typ element = koniec -> wartosc;
+
   if(poczatek == koniec) /* gdy na liscie jest tylko jeden element */
     {
       delete poczatek;
@@ -168,13 +200,20 @@ Typ stos<Typ>::delete_back()
   else /* gdy na liscie jest wiecej niz jeden element */
     {
       /* 'koniec' wskazuje na element poprzedni,
-	 dostaje sie do pola 'poprzedni' w 'koniec' i adres ten przypisuje do 'koniec' */
+	 dostaje sie do pola 'poprzedni' w 'koniec' i adres ten 
+	 przypisuje do 'koniec' */
       koniec = koniec -> poprzedni;
-      delete koniec -> nastepny; /* usuniecie z konca wskaznika do nastepnego elementu */
-      koniec -> nastepny = NULL; /* nie ma nic za lista, dlatego pokazuje na NULL */
+
+      /* usuniecie z konca wskaznika do nastepnego elementu */
+      delete koniec -> nastepny; 
+
+      /* za lista nic nie ma, dlatego pokazuje na NULL */
+      koniec -> nastepny = NULL; 
     }
 
-  rozmiar_stosu--; /* zmniejszenie zmiennej, ktora okresla aktualny rozmiar stosu */
+  /* zmniejszenie zmiennej, ktora okresla aktualny rozmiar listy */
+  rozmiar_listy--; 
+
   return element; /* zwrocenie elementu */
 }
 /*****************************************************************************/
@@ -183,17 +222,21 @@ Typ stos<Typ>::delete_back()
 
 /****************************** WYSWIETLANIE LISTY ***************************/
 template <typename Typ>
-void stos<Typ>::wyswietl_liste()
+void lista<Typ>::wyswietl_liste()
 {
   int i = 1; /* licznik elementu */
   std::cout<<"Zawartosc listy: "<<std::endl;
 
-  if(!stos_pusty()) /* jezeli lista nie jest pusta */
+  if(!lista_pusta()) /* jezeli lista nie jest pusta */
     {
       /* przejscie przez wszystkie elementy listy 
-	 element_listy<Typ> *temp = poczatek | stworzenie tymczasowej zmiennej 'temp' ktora wskazuje na poczatek listy.
-	 temp != NULL                        | (warunek) dopoki nie znajdzie konca listy
-	 temp = temp -> nastepny             | do 'temp' przypisywany jest wskaznik do nastepnego elementu 
+	 stworzenie tymczasowej zmiennej 'temp' ktora wskazuje na 
+	 poczatek listy: element_listy<Typ> *temp = poczatek 
+
+	 (warunek) dopoki nie znajdzie konca listy: temp != NULL
+
+	 do 'temp' przypisywany jest wskaznik do 
+	 nastepnego elementu: temp = temp -> nastepny  
       */
       for(element_listy<Typ> *temp = poczatek; temp != NULL; temp = temp->nastepny)
 	{    
@@ -212,11 +255,11 @@ void stos<Typ>::wyswietl_liste()
 
 /******************************* DESTRUKTOR *********************************/
 template <typename Typ>
-stos<Typ>::~stos()
+lista<Typ>::~lista()
 {
   /* usuniecie listy */
   /* dopoki stos nie jest pusty */
-  for (element_listy<Typ> *element; !stos_pusty();)
+  for (element_listy<Typ> *element; !lista_pusta();)
     {
       /* do 'element' przypisywany jest adres elementu nastepnego 
 	 dostaje sie do pola 'nastepny' w 'poczatek' go przypisuje do 'element' */
