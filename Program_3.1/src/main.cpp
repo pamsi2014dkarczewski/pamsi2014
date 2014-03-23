@@ -1,8 +1,8 @@
 #include <iostream>
 #include <stack>
-#include "typ.hh"
 
 #include "stos.hh"
+#include "typ.hh"
 
 /* Program 3.1 z trzeciej listy zadan.
 
