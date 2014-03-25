@@ -1,5 +1,5 @@
-#ifndef KOLEJKA_HH
-#define KOLEJKA_HH
+#ifndef KOPIEC_HH
+#define KOPIEC_HH
 
 #include <limits>
 #include <algorithm>
