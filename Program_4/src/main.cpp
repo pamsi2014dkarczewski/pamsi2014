@@ -9,7 +9,7 @@
 #include "typ.hh"
 
 /* Program 4 z czwartej listy zadan. 
-   wersja: v.1 */
+   wersja: v.1.1 */
 
 using namespace std;
 

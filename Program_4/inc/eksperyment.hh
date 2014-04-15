@@ -79,6 +79,8 @@ bool eksperyment(TYP *tablica, TYP *rozklad, int rozmiar)
 	  {
 	    if(wczytaj_z_pliku(rozklad,rozmiar))
 	      {
+		/* jezeli uzytkownik wczyta dane z pliku to pozostaje mu tylko
+		   wybrac rodzaj sortowania danych */
 		wybor_sortowania(tablica,rozklad,rozmiar);
 		return false;
 	      }
@@ -90,9 +92,11 @@ bool eksperyment(TYP *tablica, TYP *rozklad, int rozmiar)
 	case 'n':
 	  {
 	    std::cout<<std::endl;
+	    /* wybranie rozkladu liczb (jednostajny,normalny,Poissona) */
 	    rozklad_liczb(tablica,rozklad,rozmiar);
 	    
 	    std::cout << std::endl;
+	    /* wybranie sortowania (babelkowe, scalanie, introspektywne) */
 	    wybor_sortowania(tablica,rozklad,rozmiar);
 	    return false;	    
 	  }
@@ -154,9 +158,9 @@ int rozklad_liczb(TYP *tablica, TYP *rozklad, int rozmiar)
 	    	    
 	    std::cout << "Trwa generowanie rozkladu. Prosze czekac..."<<std::endl;
 
-	    /* od 'zera' do 'ilosc_sort' (10%, 50%,...)  tablica bedzie 
+	    /* od 'zera' do 'ilosc_sort' (10%, 50%, 90%, 99%)  tablica bedzie 
 	       wypelniona liczbami losowymi nastepnie tablica jest sortowana 
-	       tak aby poczatkowe elementy byly  ulozone. */
+	       tak aby poczatkowe elementy byly ulozone rosnaco. */
 	    for (int i = 0; i<ilosc_sort; i++)
 	      {
 		liczba = distribution(generator);
@@ -190,9 +194,9 @@ int rozklad_liczb(TYP *tablica, TYP *rozklad, int rozmiar)
 	    
 	    std::cout << "Trwa generowanie rozkladu. Prosze czekac..."<<std::endl;
 	    
-	   /* od 'zera' do 'ilosc_sort' (10%, 50%,...)  tablica bedzie 
+	   /* od 'zera' do 'ilosc_sort' (10%, 50%, 90%, 99%) tablica bedzie 
 	       wypelniona liczbami losowymi nastepnie tablica jest sortowana 
-	       tak aby poczatkowe elementy byly  ulozone. */
+	       tak aby poczatkowe elementy byly ulozone rosnaco. */
 	    for (int i = 0; i<ilosc_sort; i++)
 	      {
 		liczba = distribution(generator);
@@ -226,9 +230,9 @@ int rozklad_liczb(TYP *tablica, TYP *rozklad, int rozmiar)
 	    	    
 	    std::cout << "Trwa generowanie rozkladu. Prosze czekac..."<<std::endl;
 
-	    /* od 'zera' do 'ilosc_sort' (10%, 50%,... * rozmiar tablicy)  
-	       tablica bedzie wypelniona liczbami losowymi nastepnie tablica 
-	       jest sortowana tak aby poczatkowe elementy byly ulozone. */
+	   /* od 'zera' do 'ilosc_sort' (10%, 50%, 90%, 99%) tablica bedzie 
+	       wypelniona liczbami losowymi nastepnie tablica jest sortowana 
+	       tak aby poczatkowe elementy byly ulozone rosnaco. */
 	    for (int i = 0; i<ilosc_sort; i++)
 	      {
 		liczba = distribution(generator);

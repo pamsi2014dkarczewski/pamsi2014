@@ -36,8 +36,9 @@ int wybor_sortowania(TYP *tablica, TYP *rozklad, int rozmiar)
 	  {
 	    std::cout << "Dane beda sortowane: "<<ILOSC_POWT_ALG<<" razy."<<std::endl;
 	    std::cout << "Prosze czekac..."<<std::endl;
-	    for(int i = 0; i<ILOSC_POWT_ALG; i++)
+	    for(int i = 1; i<=ILOSC_POWT_ALG; i++)
 	      {
+		std::cout<<"Wywolanie nr: "<<i;
 		przypisz_rozklad(tablica,rozklad,rozmiar);
 		
 		auto t1 = std::chrono::high_resolution_clock::now();
@@ -48,7 +49,7 @@ int wybor_sortowania(TYP *tablica, TYP *rozklad, int rozmiar)
 		auto t2 = std::chrono::high_resolution_clock::now();
 		auto roznica = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1);
 		suma += roznica.count();
-		
+		std::cout<<". Czas sortowania: "<<roznica.count()<<" milisekund."<<std::endl;	
 		/* sprawdzenie czy tablica rzeczywiscie jest posortowana */
 		sprawdzenie_sortowania(tablica,rozmiar); 
 	      }
@@ -68,8 +69,9 @@ int wybor_sortowania(TYP *tablica, TYP *rozklad, int rozmiar)
 	    std::cout << "Dane beda sortowane: "<<ILOSC_POWT_ALG<<" razy."<<std::endl;
 	    std::cout << "Prosze czekac..."<<std::endl;
 
-	    for(int i = 0; i<ILOSC_POWT_ALG; i++)
+	    for(int i = 1; i<=ILOSC_POWT_ALG; i++)
 	      {
+		std::cout<<"Wywolanie nr: "<<i;
 		przypisz_rozklad(tablica,rozklad,rozmiar);
 		
 		auto t1 = std::chrono::high_resolution_clock::now();
@@ -80,6 +82,8 @@ int wybor_sortowania(TYP *tablica, TYP *rozklad, int rozmiar)
 		auto t2 = std::chrono::high_resolution_clock::now();
 		auto roznica = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1);
 		suma += roznica.count();
+
+		std::cout<<". Czas sortowania: "<<roznica.count()<<" milisekund."<<std::endl;
 
 		/* sprawdzenie czy tablica rzeczywiscie jest posortowana */
 		sprawdzenie_sortowania(tablica,rozmiar);
@@ -97,8 +101,9 @@ int wybor_sortowania(TYP *tablica, TYP *rozklad, int rozmiar)
 	    std::cout << "Dane beda sortowane: "<<ILOSC_POWT_ALG<<" razy."<<std::endl;
 	    std::cout << "Prosze czekac..."<<std::endl;
 
-	    for(int i = 0; i<ILOSC_POWT_ALG; i++)
+	    for(int i = 1; i<=ILOSC_POWT_ALG; i++)
 	      {
+		std::cout<<"Wywolanie nr: "<<i;
 		przypisz_rozklad(tablica,rozklad,rozmiar);
 		
 		auto t1 = std::chrono::high_resolution_clock::now();
@@ -110,6 +115,8 @@ int wybor_sortowania(TYP *tablica, TYP *rozklad, int rozmiar)
 		auto roznica = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1);
 
 		suma += roznica.count();
+		
+		std::cout<<". Czas sortowania: "<<roznica.count()<<" milisekund."<<std::endl;
 
 		/* sprawdzenie czy tablica rzeczywiscie jest posortowana */
 		sprawdzenie_sortowania(tablica,rozmiar);
