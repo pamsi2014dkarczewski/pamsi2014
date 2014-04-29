@@ -3,27 +3,22 @@
 #include "kopiec.hh"
 #include "typ.hh"
 
-#define ROZMIAR 10 /* ROZMIAR okresla wielkosc tablicy */
+#define ROZMIAR 31 /* ROZMIAR okresla ilosc elementow w tablicy */
 
 /* Program 3.2 z trzeciej listy zadan.
 
+   Dodano:
+   - wyswietlenie kopca w formie graficznej.
+   - generowanie kolejnych cyfr liczby PI
+
    Kopiec zostal zaimplementowany za pomoca STL. Mozliwe operacje do wykonania:
-   - wygenerowanie liczb pseudolosowych z dowolnego przedzialu
+   - wygenerowanie liczb pseudolosowych z przedzialu <0,9>
    - stworzenie kopca
-   - wyswietlenie kopca
+   - wyswietlenie kopca (w formie tablicy i formie 'graficznej')
    - usuniecie elementu z poczatku (wartosc najwieksza)
-
-   Program dziala na roznych typach danych. W celu ulatwienia testowania
-   programu plik 'makefile' zawiera definicje typow dla jakich program byl
-   testowany. 
-
-   (skrot)
-   make int --> kompilacja dla int
-   make char --> kompilacja dla char
-   itd.
+   - wygenerowanie kolejnych cyfr liczby PI
 
    Program kompiluje sie bez bledow i bez ostrzezen.
-   Testowany byl na typach: int, float, double
 */
 
 using namespace std;
@@ -35,9 +30,9 @@ int main ()
  
   char opcja;  /* zmienna wyboru opcji w menu */
   
-  TYP tablica[ROZMIAR] = {0}; /* tablica wypelniona zerami */
-
-  int roz = ROZMIAR-1; /* rozmiar tablicy */
+  TYP tablica[ROZMIAR+1] = {0}; /* tablica wypelniona zerami */
+ 
+  int roz = ROZMIAR; /* rozmiar tablicy */
 
   cout << "---------------------------------------------"<<endl;
   cout << "| PROGRAM SKOMPILOWANO DLA TYPU: "<<NAZWA_TYPU<<endl;
@@ -49,19 +44,20 @@ int main ()
     {
       cout << endl;
       cout << "MENU: " <<endl;
-      cout << "1.Generowanie liczb pseudolosowych"<<endl;
-      cout << "2.Stworzenie kopca / przywrocenie wlasnosci"<<endl;
-      cout << "3.Wyswietlenie kopca"<<endl;
-      cout << "4.Usuniecie elementu ze szczytu kopca"<<endl;
-      cout << "0.Zakonczenie dzialania programu"<<endl;
-      cout << "Twoj wybor (0-4): ";
+      cout << "  1.Generowanie liczb pseudolosowych"<<endl;
+      cout << "  2.Stworzenie kopca / przywrocenie wlasnosci"<<endl;
+      cout << "  3.Wyswietlenie kopca"<<endl;
+      cout << "  4.Usuniecie elementu ze szczytu kopca"<<endl;
+      cout << "  5.Generowanie tablicy wypelnionej kolejnymi cyframi liczby PI"<<endl;
+      cout << "  0.Zakonczenie dzialania programu"<<endl;
+      cout << "  Twoj wybor (0-5): ";
 
       cin >> opcja;
       cin.clear();
       cin.ignore(numeric_limits<streamsize>::max(),'\n');
             
       cout<<endl;
-    
+ 
       switch(opcja)
 	{
 	case '0': 
@@ -70,27 +66,41 @@ int main ()
 	  return false;
 
 	case '1': /* generowanie liczb pseudolosowych */
-	  generowanie_liczb(tablica, roz);
+	  generowanie_liczb(tablica,roz);
 	  break;
 
 	case '2': /* stworzenie kopca */
-	  make_heap(tablica,tablica+roz);
+	  /* kopiec zostaje stworzony od drugiego elementu w tablicy,
+	     pierwszy element tablicy zawsze jest zerem. */
+	  make_heap(tablica+1,tablica+roz);
 	  break;
 
 	case '3': /* wyswietlenie kopca */
-	  wyswietl_kopiec(tablica, roz);
+	  wyswietl_kopiec(tablica,roz);
 	  break;
 	  
 	case '4': /* usuniecie wartosci ze szczytu (wartosc najwieksza) */
-	  cout<<"Wartosc usunieta ze szczytu kopca: "<<tablica[0];
-	  tablica[0]=tablica[roz-1];
-	  roz--;
+	  if(roz > 0)
+	    {	  
+	      cout<<"Wartosc usunieta ze szczytu kopca: "<<tablica[1];
+	      tablica[1]=tablica[roz];
+	      roz--;
+	    }
+	  else
+	    {
+	      cout << "Nie ma nic do usuniecia. "<<endl;
+	      cout << "Kopiec jest pusty !"<<endl;
+	    }
+	  break;
+
+	case '5':
+	  generowanie_pi(tablica,roz);
 	  break;
 
 	default: /* opcja nierozpoznana */
 	  cout << "--------------------------------"<<endl;
 	  cout << "Nie rozpoznano opcji :'"<<opcja<<"' "<<endl;
-	  cout << "Podaj liczbe z zakresu 0-4"<<endl;
+	  cout << "Podaj liczbe z zakresu 0-5"<<endl;
 	  cout << "--------------------------------"<<endl;
 	} /* end switch */
     } /* end while */
