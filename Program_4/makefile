@@ -66,40 +66,40 @@ char: __utworz_typ_char__ clean __start__
 
 __utworz_typ_double__:
 	@echo \
-"\n\
-#ifndef TYP_HH\n\
-#define TYP_HH\n\
-#define TYP double\n\
-#define NAZWA_TYPU  \"double\"\n\
-#endif\n\
+"\r\n\
+#ifndef TYP_HH\r\n\
+#define TYP_HH\r\n\
+#define TYP double\r\n\
+#define NAZWA_TYPU  \"double\"\r\n\
+#endif\r\n\
 " > inc/typ.hh
 
 __utworz_typ_float__:
 	@echo \
-"\n\
-#ifndef TYP_HH\n\
-#define TYP_HH\n\
-#define TYP float\n\
-#define NAZWA_TYPU  \"float\"\n\
-#endif\n\
+"\r\n\
+#ifndef TYP_HH\r\n\
+#define TYP_HH\r\n\
+#define TYP float\r\n\
+#define NAZWA_TYPU  \"float\"\r\n\
+#endif\r\n\
 " > inc/typ.hh
 
 __utworz_typ_int__:
 	@echo \
-"\n\
-#ifndef TYP_HH\n\
-#define TYP_HH\n\
-#define TYP int\n\
-#define NAZWA_TYPU  \"int\"\n\
-#endif\n\
+"\r\n\
+#ifndef TYP_HH\r\n\
+#define TYP_HH\r\n\
+#define TYP int\r\n\
+#define NAZWA_TYPU  \"int\"\r\n\
+#endif\r\n\
 " > inc/typ.hh
 
 __utworz_typ_char__:
 	@echo \
-"\n\
-#ifndef TYP_HH\n\
-#define TYP_HH\n\
-#define TYP char\n\
-#define NAZWA_TYPU  \"char\"\n\
-#endif\n\
+"\r\n\
+#ifndef TYP_HH\r\n\
+#define TYP_HH\r\n\
+#define TYP char\r\n\
+#define NAZWA_TYPU  \"char\"\r\n\
+#endif\r\n\
 " > inc/typ.hh
