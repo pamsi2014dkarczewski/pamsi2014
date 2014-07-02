@@ -15,6 +15,7 @@ private:
   TYP **temp;
 
   int rozmiar; /* rozmiar macierzy */
+  int ilosc_krawedzi;
 
 public:
 
@@ -29,7 +30,8 @@ public:
   /****************************************************************************/
 
   /********************************** dodatki *********************************/
-  void wyswietl_macierz();  
+  void wyswietl_macierz();
+  bool graf_spojny();
   TYP krawedz(int poczatek, int koniec);
   int zeruj_krawedz(int poczatek, int koniec);
   void zmien_rozmiar(int rozmiar);
@@ -64,6 +66,7 @@ template <typename TYP>
 Macierz_graf<TYP>::Macierz_graf()
 {
   rozmiar = 1;
+  ilosc_krawedzi = 0;
   /* stworzenie macierzy */
   waga = new TYP *[rozmiar];
   temp = new TYP *[rozmiar];
@@ -92,10 +95,12 @@ template <typename TYP>
 bool Macierz_graf<TYP>::generuj_graf(double gestosc)
 {
   TYP wartosc;
+  int il_krawedzi = 0;
+
   /* wypelnienie macierzy losowymi wartosciami */
   for (int i = 0; i < rozmiar; i++)
     {
-      for (int j = 0; j < i+1; j++)
+      for (int j = 0; j < i; j++)
 	{
 	  wartosc = rand() % 100000;
 	  
@@ -103,11 +108,15 @@ bool Macierz_graf<TYP>::generuj_graf(double gestosc)
 	    {
 	      waga[i][j] = waga[j][i] = wartosc;
 	      temp[i][j] = temp[j][i] = wartosc;
+	      il_krawedzi++;
 	    }
 	  waga[j][j] = -1; /* przekatna macierzy */
 	  temp[j][j] = -1;
 	}
     }
+
+  ilosc_krawedzi = il_krawedzi;
+
   return true;
 }
 /******************************************************************************/
@@ -117,7 +126,8 @@ template <typename TYP>
 bool Macierz_graf<TYP>::wczytaj_z_pliku(const std::string nazwa_odczytu)
 {
   std::ifstream plik; /* dane wczytane do pliku */
-  int poczatek,koniec;
+  int poczatek, koniec;
+  int il_krawedzi = 0;
   TYP wartosc;
   
   plik.open (nazwa_odczytu.c_str(), std::ios::in);
@@ -138,7 +148,8 @@ bool Macierz_graf<TYP>::wczytaj_z_pliku(const std::string nazwa_odczytu)
 	  if(wartosc >= 0)
 	    {
 	      waga[poczatek][koniec] = waga[koniec][poczatek] = wartosc;
-	      temp[poczatek][koniec] = temp[koniec][poczatek] = wartosc;  
+	      temp[poczatek][koniec] = temp[koniec][poczatek] = wartosc;
+	      il_krawedzi++;  
 	    }
 	  else
 	    {
@@ -149,6 +160,8 @@ bool Macierz_graf<TYP>::wczytaj_z_pliku(const std::string nazwa_odczytu)
 	    }
 	}	
     }
+
+  ilosc_krawedzi = il_krawedzi;
 
   plik.close();
   return true;
@@ -212,6 +225,20 @@ void Macierz_graf<TYP>::wyswietl_macierz()
 	}
     }
   std::cout << std::setw(0) << std::endl;
+}
+/******************************************************************************/
+
+
+/*********************************** GRAF SPOJNY ******************************/
+/* sprawdzenie czy graf jest spojny */
+/* spojnosc zwraca true, niespojnosc zwraca false */
+template <typename TYP>
+bool Macierz_graf<TYP>::graf_spojny()
+{
+  int n = rozmiar;
+  int m = ilosc_krawedzi;
+
+  return ( ((n-1) <= m) && (((n*(n-1))/2) >= m) ) ? true : false;
 }
 /******************************************************************************/
 

@@ -19,7 +19,6 @@ int main ()
 
   char opcja;
   string nazwa_odczytu, nazwa_zapisu;
-  TYP wynik = 0;
   Macierz_graf<TYP> macierz;
   Lista_graf<TYP> lista;
   
@@ -27,8 +26,9 @@ int main ()
   cout << "| PROGRAM SKOMPILOWANO DLA TYPU: " << NAZWA_TYPU << endl;
   cout << "---------------------------------------------" << endl;
 
-  cout << "Lista 5, Program 5 |zajecia PAMSI| graf." << endl;
-  cout << "Algorytm Kruskala i Prima. Minimalne drzewo rozpinajace." << endl;
+  cout << "Lista 6, Program 6 |zajecia PAMSI| graf." << endl;
+  cout << "Algorytm Dijkstry i Bellmana-Forda. Wyznaczanie najkrotszej sciezki";
+  cout << " w grafie." << endl;
    
   while(true)
     {
@@ -39,15 +39,15 @@ int main ()
       cout << "  2.Wczytanie grafu z pliku."<<endl;
       cout << "  3.Zapisanie grafu do pliku."<<endl;
       cout << "  4.Wyswietlenie macierzy."<<endl;
-      cout << "  5.Algorytm Kruskala dla macierzy."<<endl;
-      cout << "  6.Algorytm Prima dla macierzy."<<endl<<endl;
+      cout << "  5.Algorytm Dijkstry dla macierzy."<<endl;
+      cout << "  6.Algorytm Bellmana-Forda dla macierzy."<<endl<<endl;
       cout << " Operacje na liscie:"<<endl;
       cout << "  a.Generowanie grafu."<<endl;
       cout << "  b.Wczytanie grafu z pliku."<<endl;
       cout << "  c.Zapisanie grafu do pliku."<<endl;
       cout << "  d.Wyswietlenie listy."<<endl;
-      cout << "  k.Algorytm Kruskala dla listy."<<endl;
-      cout << "  p.Algorytm Prima dla listy."<<endl<<endl;
+      cout << "  k.Algorytm Dijkstry dla listy."<<endl;
+      cout << "  p.Algorytm Bellmana-Forda dla listy."<<endl<<endl;
       cout << " Twoj wybor (0-6) lub (a,b,c,d,k,p): ";
 
       cin >> opcja;
@@ -93,13 +93,14 @@ int main ()
 
 	       zwrocenie wartosci 0 oznacza blad podczas otwierania pliku */
 	    int rozmiar = znajdz_rozmiar_w_pliku(nazwa_odczytu);
-
+	    
 	    if(rozmiar > 0)
 	      {	    
 		macierz.zmien_rozmiar(rozmiar);
-
+	    
 		/* graf zostaje wypelniony danymi wczytanymi z pliku */
 		macierz.wczytaj_z_pliku(nazwa_odczytu);
+		
 	      }
 	  }
 	  break;
@@ -121,37 +122,61 @@ int main ()
 	  }
 	  break;
 	  
-	case '5': /* Algorytm Kruskala */
+	case '5': /* Algorytm Dijkstry */
 	  {
+	    char znak;
 	    if(macierz.graf_spojny())
 	      {
-		wynik = macierz.algorytm_Kruskala();
-		cout << "Wartosc MST wedlug Kruskala: " << wynik << endl;
-	    
+		macierz.algorytm_Dijkstry();
 		cout << "***************************************************"<<endl;
+		cout << "Zapisac wygenerowana droge do pliku ? [t/n] : ";
+		cin >> znak;
+		if(znak == 't')
+		  {
+		    cout << "Podaj nazwe pliku do ktorego dane zostana zapisane : ";
+		    cin >> nazwa_zapisu;
+		    nazwa_zapisu += ".dat";
+		    
+		    macierz.zapisz_droge_do_pliku(nazwa_zapisu);
+		  }
+		else
+		  {
+		    cout << "Wynik nie bedzie zapisany." << endl;
+		  }
 	      }
 	    else
 	      {
-		cerr << "Graf nie jest spojny. ";
-		cerr << "Wykonanie algorytmu nie jest mozliwe." << endl;
-	      }
+		cerr << "Graf nie jest spojny !"<<endl;
+	      }	
 	  }
 	  break;
 
-	case '6': /* Algorytm Prima */
+	case '6': /* Algorytm Bellmana-Forda */
 	  {
+	    char znak;
 	    if(macierz.graf_spojny())
 	      {
-		wynik = macierz.algorytm_Prima();
-		cout << "Wartosc MST wedlug Prima: " << wynik << endl;
-
+		macierz.algorytm_Bellmana_Forda();
 		cout << "***************************************************"<<endl;
+		cout << "Zapisac wygenerowana droge do pliku ? [t/n] : ";
+		cin >> znak;
+		if(znak == 't')
+		  {
+		    cout << "Podaj nazwe pliku do ktorego dane zostana zapisane : ";
+		    cin >> nazwa_zapisu;
+		    nazwa_zapisu += ".dat";
+		    
+		    macierz.zapisz_droge_do_pliku(nazwa_zapisu);
+		  }
+		else
+		  {
+		    cout << "Wynik nie bedzie zapisany." << endl;
+		  }
 	      }
 	    else
 	      {
-		cerr << "Graf nie jest spojny. ";
-		cerr << "Wykonanie algorytmu nie jest mozliwe." << endl;
-	      }
+		cerr << "Graf nie jest spojny !"<<endl;
+	      }	
 	  }
 	  break;
 
@@ -185,7 +210,7 @@ int main ()
 
 	       zwrocenie wartosci 0 oznacza blad podczas otwierania pliku */
 	    int rozmiar = znajdz_rozmiar_w_pliku(nazwa_odczytu);
-
+	    
 	    if(rozmiar > 0)
 	      {	    
 		lista.zmien_rozmiar(rozmiar);
@@ -213,37 +238,61 @@ int main ()
 	  }
 	  break;
 
-	case 'k': /* Algorytm Kruskala */
+	case 'k': /* Algorytm Dijkstry */
 	  {
+	    char znak;
 	    if(lista.graf_spojny())
 	      {
-		wynik = lista.algorytm_Kruskala();
-		cout << "Wartosc MST wedlug Kruskala: "<< wynik << endl;
-		
+		lista.algorytm_Dijkstry();
 		cout << "***************************************************"<<endl;
+		cout << "Zapisac wygenerowana droge do pliku ? [t/n] : ";
+		cin >> znak;
+		if(znak == 't')
+		  {
+		    cout << "Podaj nazwe pliku do ktorego dane zostana zapisane : ";
+		    cin >> nazwa_zapisu;
+		    nazwa_zapisu += ".dat";
+		    
+		    lista.zapisz_droge_do_pliku(nazwa_zapisu);
+		  }
+		else
+		  {
+		    cout << "Wynik nie bedzie zapisany." << endl;
+		  }
 	      }
 	    else
 	      {
-		cerr << "Graf nie jest spojny. ";
-		cerr << "Wykonanie algorytmu nie jest mozliwe." << endl;
-	      }
+		cerr << "Graf nie jest spojny !"<<endl;
+	      }	
 	  }
 	  break;
 
-	case 'p': /* Algorytm Prima */
+	case 'p': /* Algorytm Bellmana-Forda */
 	  {
+	    char znak;
 	    if(lista.graf_spojny())
 	      {
-		wynik = lista.algorytm_Prima();
-		cout << "Wartosc MST wedlug Prima: "<< wynik << endl;
-		
+		lista.algorytm_Bellmana_Forda();
 		cout << "***************************************************"<<endl;
+		cout << "Zapisac wygenerowana droge do pliku ? [t/n] : ";
+		cin >> znak;
+		if(znak == 't')
+		  {
+		    cout << "Podaj nazwe pliku do ktorego dane zostana zapisane : ";
+		    cin >> nazwa_zapisu;
+		    nazwa_zapisu += ".dat";
+		    
+		    lista.zapisz_droge_do_pliku(nazwa_zapisu);
+		  }
+		else
+		  {
+		    cout << "Wynik nie bedzie zapisany." << endl;
+		  }
 	      }
 	    else
 	      {
-		cerr << "Graf nie jest spojny. ";
-		cerr << "Wykonanie algorytmu nie jest mozliwe." << endl;
-	      }
+		cerr << "Graf nie jest spojny !"<<endl;
+	      }	
 	  }
 	  break;
 

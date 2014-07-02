@@ -47,6 +47,7 @@ public:
 
   /********************************** dodatki *********************************/
   void wyswietl_liste();
+  bool graf_spojny();
   void zmien_rozmiar(int rozmiar);
   void unia(int poczatek, int koniec, TYP *MST);
   TYP znajdz(int wartosc, TYP *MST);
@@ -132,7 +133,7 @@ bool Lista_graf<TYP>::wczytaj_z_pliku(const std::string nazwa_odczytu)
 	  
 	  plik >> koniec; 
 	  if(koniec > rozmiar) std::cerr << "Poza rozmiarami macierzy !" << std::endl;
-	  /* ostatni element w liscie jest dublowany o.O, naprawic ! */
+
 	  plik >> wartosc;
 	  if(wartosc >= 0)
 	    {
@@ -191,7 +192,6 @@ void Lista_graf<TYP>::wyswietl_liste()
 {
   if(lista.size() > 0)
     {
-      /* ostatni element w liscie jest dublowany o.O */
       std::cout << "Poczatek   ->   Koniec   |   Waga" <<std::endl;
       for (unsigned int i = 0; i < lista.size(); i++)
 	{
@@ -206,6 +206,20 @@ void Lista_graf<TYP>::wyswietl_liste()
       std::cerr << "Lista jest pusta." << std::endl;
     }
   std::cout << std::setw(0) << std::endl;
+}
+/******************************************************************************/
+
+
+/*********************************** GRAF SPOJNY ******************************/
+/* sprawdzenie czy graf jest spojny */
+/* spojnosc zwraca true, niespojnosc zwraca false */
+template <typename TYP>
+bool Lista_graf<TYP>::graf_spojny()
+{
+  int n = rozmiar;
+  int m = lista.size();
+
+  return ( ((n-1) <= m) && (((n*(n-1))/2) >= m) ) ? true : false;
 }
 /******************************************************************************/
 
