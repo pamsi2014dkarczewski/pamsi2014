@@ -2,8 +2,9 @@
 #define MACIERZ_GRAF_HH
 
 #include <chrono> /* pomiar czasu */
+#include <queue>
 
-#define ILOSC_POWTORZEN 105 /* ilosc powtorzen algorytmu (>=5) */
+#define ILOSC_POWTORZEN 15 /* ilosc powtorzen algorytmu (>=5) */
 
 /********************************* KLASA Macierz_graf *************************/
 template <typename TYP>
@@ -13,10 +14,15 @@ private:
 
   TYP **waga; /* macierz wag krawedzi */
   TYP **temp;
+  TYP **przeplyw; /* macierz przeplywow */
 
-  int zrodlo;
-  int *droga;
-  int *poprzednik;
+  TYP *poprzednik; /* tablica przechowujaca poprzednikow */
+  TYP *pozostalo; /* tablica przechowuje wartosci przeplywu ktore pozostaly */
+
+  std::queue <TYP> kolejka;
+
+  /* numer wierzcholka ze zrodlem i z ujsciem */
+  int zrodlo, ujscie;
   
   int rozmiar; /* rozmiar macierzy, ilosc wierzcholkow */
   int ilosc_krawedzi;
@@ -31,23 +37,16 @@ public:
   bool generuj_graf(double gestosc); 
   bool wczytaj_z_pliku(const std::string nazwa_odczytu);
   bool zapisz_do_pliku(const std::string nazwa_zapisu);
-  bool zapisz_droge_do_pliku(const std::string nazwa_zapisu);
   /****************************************************************************/
 
   /********************************** dodatki *********************************/
   void wyswietl_macierz();
-  bool graf_spojny();
   void odtworz_graf(TYP **waga, TYP **temp);
   void zmien_rozmiar(int rozmiar);
-
-  void wyjscie_na_plik(std::ofstream &plik);
-  void sciezka(int wsp, std::ofstream &plik);
   /****************************************************************************/
 
   /********************************* algorytmy ********************************/
-  void algorytm_Dijkstry();
-  void algorytm_Bellmana_Forda();
-  bool Bellman_Ford();
+  void algorytm_Edmondsa_Karpa();
   /****************************************************************************/
 
 
@@ -58,10 +57,12 @@ public:
       {
 	delete [] waga[i];
 	delete [] temp[i];
+	delete [] przeplyw[i];
       }
     delete [] waga;
     delete [] temp;
-    delete [] droga;
+    delete [] przeplyw;
+    delete [] pozostalo;
     delete [] poprzednik;  
   }
 
@@ -81,22 +82,26 @@ Macierz_graf<TYP>::Macierz_graf()
   /* stworzenie macierzy */
   waga = new TYP *[rozmiar];
   temp = new TYP *[rozmiar];
-  droga = new int [rozmiar];
-  poprzednik = new int [rozmiar];
+  przeplyw = new TYP *[rozmiar];
+
+  pozostalo = new TYP [rozmiar];
+  poprzednik = new TYP [rozmiar];
 
   for (int i = 0; i < rozmiar; i++)
     {
       waga[i] = new TYP [rozmiar];
       temp[i] = new TYP [rozmiar];
+      przeplyw[i] = new TYP [rozmiar];
     }
 
-  /* wypelnienie macierzy wartoscia -20 */
+  /* wypelnienie macierzy wartoscia -1, 0 */
   for (int i = 0; i < rozmiar; i++)
     {
       for (int j = 0; j < i+1; j++)
 	{
-	  waga[i][j] = waga[j][i] = -20;
-	  temp[i][j] = temp[j][i] = -20;
+	  waga[i][j] = waga[j][i] = -1;
+	  temp[i][j] = temp[j][i] = -1;
+	  przeplyw[i][j] = przeplyw[j][i] = 0;
 	}
     }
 }
@@ -124,19 +129,19 @@ bool Macierz_graf<TYP>::generuj_graf(double gestosc)
   /* wypelnienie macierzy losowymi wartosciami */
   for (int i = 0; i < rozmiar; i++)
     {
-      for (int j = 0; j < i; j++)
+      for (int j = 0; j < rozmiar; j++)
 	{
 	  /* zakres generowania liczb np. <1,500> */
 	  wartosc = (rand() % waga_max) + waga_min; 
 	  
-	  if( wartosc  <= (gestosc*waga_max))
+	  if( wartosc  <= (gestosc*waga_max) && i != j)
 	    {
-	      waga[i][j] = waga[j][i] = wartosc;
-	      temp[i][j] = temp[j][i] = wartosc;
+	      waga[i][j] = wartosc;
+	      temp[i][j] = wartosc;
 	      ilosc_krawedzi++;
 	    }
-	  waga[j][j] = -20; /* przekatna macierzy */
-	  temp[j][j] = -20;
+	  waga[j][j] = 0; /* przekatna macierzy */
+	  temp[j][j] = 0;
 	}
     }
 
@@ -160,9 +165,9 @@ bool Macierz_graf<TYP>::wczytaj_z_pliku(const std::string nazwa_odczytu)
     {
       std::cout << "Wczytuje dane !"<<std::endl;
 
-      /* wczytanie pierwszej linii, ktora informuje o ilosci krawedzi, ilosci
-	 wierzcholkow oraz podany jest wierzcholek startowy (zrodlo) */
-      plik >> ilosc_krawedzi >> rozmiar >> zrodlo;
+      /* wczytanie pierwszej linii, ktora informuje o ilosci wierzcholkow oraz 
+	 ilosci krawedzi. */
+      plik >> rozmiar >> ilosc_krawedzi;
 
       if(plik.bad())
 	{
@@ -170,6 +175,16 @@ bool Macierz_graf<TYP>::wczytaj_z_pliku(const std::string nazwa_odczytu)
 	  return false;
  	}
 
+      /* wczytanie drugiej linii, ktora zawiera 'zrodlo' i 'ujscie' */
+      plik >> zrodlo >> ujscie;
+
+      if(plik.bad())
+	{
+	  std::cerr << "Blad w drugiej linii pliku !" << std::endl;
+	  return false;
+ 	}
+
+      /* wczytywanie grafu */
       while (!plik.eof() && !plik.bad())
 	{
 	  plik >> poczatek;
@@ -188,17 +203,17 @@ bool Macierz_graf<TYP>::wczytaj_z_pliku(const std::string nazwa_odczytu)
 	    }
 	  
 	  plik >> wartosc;
-	  if(wartosc >= -10)
+	  if(wartosc >= 0)
 	    {
-	      waga[poczatek][koniec] = waga[koniec][poczatek] = wartosc;
-	      temp[poczatek][koniec] = temp[koniec][poczatek] = wartosc; 
+	      waga[poczatek][koniec] = wartosc;
+	      temp[poczatek][koniec] = wartosc; 
 	    }
 	  else
 	    {
 	      std::cerr << "Nieprawidlowa waga krawedzi !" << std::endl;
-	      std::cerr << "Zostanie ona zastapiona wartoscia '-20' !" << std::endl;
-	      waga[poczatek][koniec] = waga[koniec][poczatek] = -20;
-	      temp[poczatek][koniec] = temp[koniec][poczatek] = -20;
+	      std::cerr << "Zostanie ona zastapiona wartoscia '0' !" << std::endl;
+	      waga[poczatek][koniec] = 0;
+	      temp[poczatek][koniec] = 0;
 	    }
 	}	
     }
@@ -219,11 +234,15 @@ bool Macierz_graf<TYP>::zapisz_do_pliku(const std::string nazwa_zapisu)
 
   if(plik.good())
     {
+
+      plik << rozmiar << "\t" << ilosc_krawedzi << std::endl;
+      plik << zrodlo << "\t" << ujscie << std::endl;
+
       for(int i = 0; i < rozmiar; i++)
 	{
 	  for(int j = 0; j < i+1; j++)
 	    {
-	      if ( waga[i][j] > -20)
+	      if ( waga[i][j] > -1)
 		{
 		  plik << i << "\t";
 		  plik << j << "\t";
@@ -250,41 +269,11 @@ bool Macierz_graf<TYP>::zapisz_do_pliku(const std::string nazwa_zapisu)
 /******************************************************************************/
 
 
-/******************************* ZAPISYWANIE DROGI ****************************/
-template <typename TYP>
-bool Macierz_graf<TYP>::zapisz_droge_do_pliku(const std::string nazwa_zapisu)
-{
-  std::ofstream plik; 
-
-  plik.open(nazwa_zapisu.c_str(), std::ios::out | std::ios::trunc);
-
-  if(plik.good())
-    {
-      wyjscie_na_plik(plik);
-    }
-  else
-    {
-      std::cerr << "ZAPISANIE DO PLIKU '" << nazwa_zapisu;
-      std::cerr << "' NIE POWIODLO SIE !!!" << std::endl;
-
-      plik.close();
-      return false;
-    }
-
-  std::cout << "Zapisywanie do pliku : '" << nazwa_zapisu;
-  std::cout << "' zakonczone powodzeniem." << std::endl; 
-  
-  plik.close();
-  return true;
-}
-/******************************************************************************/
-
-
 /**************************** WYSWIETLENIE MACIERZY ***************************/
 template <typename TYP>
 void Macierz_graf<TYP>::wyswietl_macierz()
 {
-  std::cout << "Wartosc '-20' oznacza brak polaczenia miedzy wierzcholkami" << std::endl;
+  std::cout << "Wartosc '-1' oznacza brak polaczenia miedzy wierzcholkami" << std::endl;
  
   for (int i = 0; i < rozmiar; i++)
     {
@@ -295,20 +284,6 @@ void Macierz_graf<TYP>::wyswietl_macierz()
 	}
     }
   std::cout << std::setw(0) << std::endl;
-}
-/******************************************************************************/
-
-
-/*********************************** GRAF SPOJNY ******************************/
-/* sprawdzenie czy graf jest spojny */
-/* spojnosc zwraca true, niespojnosc zwraca false */
-template <typename TYP>
-bool Macierz_graf<TYP>::graf_spojny()
-{
-  int n = rozmiar;
-  int m = ilosc_krawedzi;
-
-  return ( ((n-1) <= m) && (((n*(n-1))/2) >= m) ) ? true : false;
 }
 /******************************************************************************/
 
@@ -341,11 +316,13 @@ void Macierz_graf<TYP>::zmien_rozmiar(int roz)
 	{
 	  delete [] waga[i];
 	  delete [] temp[i];
+	  delete [] przeplyw[i];
 	}
 
       delete [] waga;
       delete [] temp;
-      delete [] droga;
+      delete [] przeplyw;
+      delete [] pozostalo;
       delete [] poprzednik;
 
       rozmiar = roz;
@@ -353,22 +330,26 @@ void Macierz_graf<TYP>::zmien_rozmiar(int roz)
       /* stworzenie nowej macierzy z wymaganym rozmiarem */
       waga = new TYP *[rozmiar];
       temp = new TYP *[rozmiar];
-      droga = new int [rozmiar];
-      poprzednik = new int [rozmiar];
+      przeplyw = new TYP *[rozmiar];
+
+      pozostalo = new TYP [rozmiar];
+      poprzednik = new TYP [rozmiar];
 
       for (int i = 0; i < rozmiar; i++)
 	{
 	  waga[i] = new TYP [rozmiar];
 	  temp[i] = new TYP [rozmiar];
+	  przeplyw[i] = new TYP [rozmiar];
 	}
       
-      /* wypelnienie macierzy wartoscia -20 */
+      /* wypelnienie macierzy wartoscia 0 */
       for (int i = 0; i < rozmiar; i++)
 	{
 	  for (int j = 0; j < i+1; j++)
 	    {
-	      waga[i][j] = waga[j][i] = -20;
-	      temp[i][j] = temp[j][i] = -20;
+	      waga[i][j] = waga[j][i] = 0;
+	      temp[i][j] = temp[j][i] = 0;
+	      przeplyw[i][j] = przeplyw[j][i] = 0;
 	    }
 	}
     }
@@ -380,228 +361,132 @@ void Macierz_graf<TYP>::zmien_rozmiar(int roz)
 /******************************************************************************/
 
 
-/******************************** WYJSCIE NA PLIK *****************************/
+/************************** ALGORYTM EDMONDSA-KARPA ***************************/
 template <typename TYP>
-void Macierz_graf<TYP>::wyjscie_na_plik(std::ofstream &plik)
-{ 
-  for(int i = 0; i < rozmiar; i++)
-    {
-      plik<<i<<" "<<droga[i]<<" ";
-      sciezka(i,plik);
-      plik<<std::endl;
-    } 
-}
-/******************************************************************************/
-
-
-/*********************************** DROGA ************************************/
-template <typename TYP>
-void Macierz_graf<TYP>::sciezka(int w, std::ofstream &plik)
-{
-  if(w == zrodlo)
-    {
-      plik<<w<<" ";
-    }  
-  else if(poprzednik[w] == -1) std::cerr<<"Brak polaczenia: "<<zrodlo<<"->"<<w<<std::endl;
-  else 
-    {
-      sciezka(poprzednik[w],plik);
-      plik<<w<<" ";
-    }
-}
-/******************************************************************************/
-
-
-/***************************** ALGORYTM DIJKSTRY ******************************/
-template <typename TYP>
-void Macierz_graf<TYP>::algorytm_Dijkstry()
+void Macierz_graf<TYP>::algorytm_Edmondsa_Karpa()
 {
   /* wartosc maksymalna symbolizuje nieskonczonosc */
   TYP max = std::numeric_limits<TYP>::max();
-  
-  int licznik;
-  int min_index;
-  int minimum;
-  
+
+  TYP przeplyw_max; /* wartosc maksymalnego przeplywu w sieci */
+  TYP przepustowosc_residualna;
+
   bool *odwiedzone = new bool [rozmiar];
+
+  int wyjscie = 0; /* wyjscie z petli */
 
   double suma = 0; /* suma czasow */
   
   std::cout << "Algorytm zostanie wykonany " << ILOSC_POWTORZEN << " razy. ";
-  std::cout << "Piec pierwszych wywolan to 'rozgrzewka' :)." << std::endl;
+  std::cout << "Piec pierwszych wywolan to 'rozgrzewka' :).";
+  std::cout << std::endl << std::endl;
 
   /* 105 pomiarow czasu */
   for(int i = 1; i <= ILOSC_POWTORZEN; i++)
     {
-      licznik = 0;
-      min_index = 0;
       /* odtworzenie grafu, chodzi o to aby graf byl ciagle ten sam */
       odtworz_graf(waga,temp);
 
       /* rozpoczecie pomiaru czasu */
       auto t1 = std::chrono::high_resolution_clock::now();
 
+      /* wyzerowanie macierzy z wartoscia przeplywu */
       for(int i = 0; i < rozmiar; i++)
 	{
-	  droga[i] = max;
-	  poprzednik[i] = -1;
-	  odwiedzone[i] = false;
+	  for (int j = 0; j < i + 1; j++)
+	    {
+	      przeplyw[i][j] = przeplyw[j][i] = 0;
+	    }
 	}
 
-      droga[zrodlo] = 0;
+      przeplyw_max = 0;
 
-      while(licznik < rozmiar)
+      while(true)
 	{
-	  /* znajdowanie najmniejszej nieodwiedzonej wagi */
-	  minimum = max;
+	  /* inicjalizacja */
 	  for(int i = 0; i < rozmiar; i++)
 	    {
-	      if((!odwiedzone[i]) && (droga[i] <= minimum))
-		{
-		  minimum = droga[i];
-		  min_index = i;
-		}
+	      odwiedzone[i] = false; /* zadna krawedz nie jest odwiedzona */
+	      poprzednik[i] = 0; /* brak poprzednikow */
 	    }
 
-	  /* odwiedzona zostaje waga z najmniejsza wartoscia */
-	  odwiedzone[min_index] = true;
+	  poprzednik[zrodlo] = -1;
+	  pozostalo[zrodlo] = max;
 
-	  for(int i = 0; i < rozmiar; i++)
+	  /* wyzerowanie kolejki */
+	  while(kolejka.size()) kolejka.pop(); 
+
+	  kolejka.push(zrodlo); /* dodanie zrodla na koniec kolejki */
+
+	  wyjscie = 0;
+	  int i, j;
+
+	  while(kolejka.size()) /* dopoki kolejka zawiera elementy */
 	    {
-	      if((!odwiedzone[i]) && (waga[min_index][i] > -1))
+	      i = kolejka.front(); /* pobranie elementu */
+	      odwiedzone[i] = true; /* 'odwiedzenie' tego elementu */
+	      kolejka.pop();
+
+	      for(j = 0; j < rozmiar; j++) /* rozpoczecie BFS */
 		{
-		  if(droga[i] > droga[min_index]+waga[min_index][i])
+		  /* wyznaczenie przepustowosci residualnej */
+		  przepustowosc_residualna = waga[i][j] - przeplyw[i][j];
+
+		  if(przepustowosc_residualna && !poprzednik[j] && odwiedzone[j] == false)
 		    {
-		      droga[i] = droga[min_index]+waga[min_index][i];
-		      poprzednik[i] = min_index;
-		    }
-		}
-	    }	  
-	  licznik++;
-	}
+		      poprzednik[j] = i; /* zapamietanie poprzednika */
+
+		      /* obliczenie przepustowosci do wezla 'j' */
+		      pozostalo[j] = min(pozostalo[i], przepustowosc_residualna);
+		      odwiedzone[j] = true; /* wezel odwiedzony */
+
+		      if(j == ujscie)
+			{
+			  przeplyw_max += pozostalo[ujscie];
+
+			  while( j != zrodlo) /* cofanie od ujscia do zrodla */
+			    {
+			      i = poprzednik[j];
+
+			      /* w kierunku zwiekszenie przeplywu */
+			      przeplyw[i][j] += pozostalo[ujscie];
+
+			      /* kierunek przeciwny, zmniejszenie przeplywu */
+			      przeplyw[j][i] -= pozostalo[ujscie];
+
+			      /* nastepna krawedz */
+			      j = i;
+			    }
+			  wyjscie = 1; break;
+			}
+		      kolejka.push(j);
+		    } /* end if(przepustowosc_residualna && ...) */
+		} /* end for */
+	      if(wyjscie) break;
+	    }
+	  if(!wyjscie) break;
+
+	} /* end while(true) */
 
       auto t2 = std::chrono::high_resolution_clock::now();
   
       auto roznica = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1);
-  
+        
+      std::cout << "Wartosc maksymalnego przeplywu w sieci: " << przeplyw_max;
+      std::cout << std::endl;
+      
       if(i > 5) suma += roznica.count(); /* pierwsze 5 czasow pomijam */
 
-      std::cout<<"Czas wykonania algorytmu Dijkstry dla macierzy: "<<roznica.count()<<" milisekund."<<std::endl;	
+      std::cout << "Czas wykonania algorytmu Edmondsa-Karpa dla macierzy: ";
+      std::cout << roznica.count()<<" milisekund." << std::endl << std::endl;	
  
     }
  
-  std::cout << std::endl;
   std::cout << "******************* PODSUMOWANIE ******************"<<std::endl;
-  std::cout << "Sredni czas wykonania algorytmu Dijkstry: ";
+  std::cout << "Sredni czas wykonania algorytmu Edmondsa-Karpa: ";
   std::cout << (suma/(ILOSC_POWTORZEN - 5)) << " milisekund" << std::endl;
 
   delete [] odwiedzone;
-}
-/******************************************************************************/
-
-
-/**************************** ALGORYTM BELLMANA-FORDA *************************/
-template <typename TYP>
-bool Macierz_graf<TYP>::Bellman_Ford()
-{
-  TYP max = std::numeric_limits<TYP>::max() - 10000; 
-
-  /* inicjalizacja */
-  for(int i = 0; i < rozmiar; i++)
-    {
-      droga[i] = max;
-      poprzednik[i] = -1;
-    }
-      
-  droga[zrodlo] = 0;
-
-  bool wyjscie;
-  for(int k = 1; k < rozmiar; k++)
-    {
-      wyjscie = true;
-      for(int i = 0; i < rozmiar; i++)
-	{
-	  for(int j = 0; j < rozmiar; j++)
-	    {
-	      if(i!=j && waga[i][j] >= -10 && waga[i][j] <= 1000)
-		{
-		  if(droga[j] > droga[i] + waga[i][j])
-		    {
-		      wyjscie = false;
-		      droga[j] = droga[i] + waga[i][j];	  
-		      poprzednik[j] = i;
-		    }
-		}
-	    }
-	}
-      if(wyjscie) return true;
-    }
-
-  /* sprawdzenie ujemnego cyklu */
-  for(int i = 0; i < rozmiar; i++)
-    {
-      for(int j = 0; j < rozmiar; j++)
-	{
-	  if((i!=j) && (waga[i][j] >= -10) && (waga[i][j] <= 1000))
-	    {
-	      if(droga[j] > droga[i] + waga[i][j])
-		{
-		  return false;
-		}
-	    }
-	}
-    }
-
-  return true;
-}
-/******************************************************************************/
-
-
-/************************** ALGORYTM BELLMANA-FORDA ***************************/
-template <typename TYP>
-void Macierz_graf<TYP>::algorytm_Bellmana_Forda()
-{ 
-  double suma = 0; /* suma czasow */
-
-  bool flaga = true;
-
-  std::cout << "Algorytm zostanie wykonany " << ILOSC_POWTORZEN << " razy. ";
-  std::cout << "Piec pierwszych wywolan to 'rozgrzewka' :)." << std::endl;
-  
-  /* 105 pomiarow czasu */
-  for(int i = 1; i <= ILOSC_POWTORZEN; i++)
-    {
-      odtworz_graf(waga,temp);
-
-      /* rozpoczecie pomiaru czasu */      
-      auto t1 = std::chrono::high_resolution_clock::now();
-      
-      if(!Bellman_Ford())
-	{
-	  std::cerr<<"Wykryto ujemny cykl, prosze wygenerowac graf ponownie !";
-	  std::cerr<<std::endl;
-	  flaga = false;
-	}
-      else
-	{
-	  auto t2 = std::chrono::high_resolution_clock::now();
-	  
-	  auto roznica = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1);
-	  
-	  if(i > 5) suma += roznica.count(); /* pierwsze 5 czasow pomijam */
-	  
-	  std::cout << "Czas wykonania algorytmu Bellmana-Forda dla macierzy: ";
-	  std::cout << roznica.count() << " milisekund." << std::endl;
-	}
-    } /* end for */
-  
-  if(flaga) /* gdy algorytm wykryl ujemny cykl to podsumowanie jest zbedne */
-    {
-      std::cout << std::endl;
-      std::cout << "******************* PODSUMOWANIE ******************"<<std::endl;
-      std::cout << "Sredni czas wykonania algorytmu Bellmana-Forda: ";
-      std::cout << (suma/(ILOSC_POWTORZEN - 5)) << " milisekund" << std::endl;
-    }
 }
 /******************************************************************************/
 

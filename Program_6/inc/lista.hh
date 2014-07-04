@@ -67,9 +67,9 @@ public:
 private:
 
   std::vector<Krawedz> lista;
-  TYP *droga;
-  TYP *poprzednik;
-  TYP rozmiar, ilosc_krawedzi, zrodlo;
+  int *droga;
+  int *poprzednik;
+  int rozmiar, ilosc_krawedzi, zrodlo;
 
 }; /* end class Lista_graf */
 /******************************************************************************/
@@ -83,8 +83,8 @@ Lista_graf<TYP>::Lista_graf()
   ilosc_krawedzi = 0;
   zrodlo = 0;
 
-  droga = new TYP [rozmiar];
-  poprzednik = new TYP [rozmiar];
+  droga = new int [rozmiar];
+  poprzednik = new int [rozmiar];
 }
 /******************************************************************************/
 
@@ -140,8 +140,8 @@ void Lista_graf<TYP>::zmien_rozmiar(int roz)
 
       rozmiar = roz;
 
-      droga = new TYP [rozmiar];
-      poprzednik = new TYP [rozmiar];
+      droga = new int [rozmiar];
+      poprzednik = new int [rozmiar];
     }
   else
     {
